@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Для Вероники ❤️</title>
+
+<style>
+
+body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #fff5f7, #fffaf0);
+    text-align: center;
+    padding: 40px;
+    color: #444;
+    overflow-x: hidden;
+}
+
+/* боковые фото */
+
+.side-photo {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 200px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    transition: opacity 0.5s ease;
+}
+
+.left {
+    left: 20px;
+}
+
+.right {
+    right: 20px;
+}
+
+/* центральный блок */
+
+.container {
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    display: inline-block;
+    min-width: 320px;
+    position: relative;
+    z-index: 10;
+}
+
+h1 {
+    color: #ff6b81;
+}
+
+button {
+    display: block;
+    margin: 10px auto;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 10px;
+    background: #ffd6e0;
+    cursor: pointer;
+    font-size: 16px;
+    transition: 0.3s;
+    position: relative;
+}
+
+button:hover {
+    background: #ffb6c1;
+    transform: scale(1.05);
+}
+
+.message {
+    margin-top: 20px;
+    color: #ff6b81;
+    font-weight: bold;
+}
+
+.hidden {
+    display: none;
+}
+
+/* зона убегающей кнопки */
+
+.runaway-zone {
+    position: relative;
+    height: 120px;
+}
+
+#runaway {
+    position: absolute;
+    left: 20px;
+    top: 40px;
+}
+
+#oleg {
+    position: absolute;
+    right: 20px;
+    top: 40px;
+}
+
+/* финал */
+
+.final {
+    font-size: 28px;
+    color: #ff4d6d;
+    margin-top: 20px;
+}
+
+.final-photo {
+    width: 320px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    margin-top: 20px;
+    animation: appear 1.5s ease;
+}
+
+@keyframes appear {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+</style>
+</head>
+<body>
+
+<img id="leftPhoto" src="photo1.jpg" class="side-photo left">
+<img id="rightPhoto" src="photo2.jpg" class="side-photo right">
+
+<div class="container">
+
+<h1>Привет, Вероника ❤️</h1>
+
+<div id="question"></div>
+
+<div id="answers"></div>
+
+<div class="message" id="message"></div>
+
+<div class="final hidden" id="final">
+С 14 февраля любовь моя ❤️<br><br>
+ТЫ ЗАСЛУЖИЛА ПРИЗ 🎁<br><br>
+
+<img src="photo7.jpg" class="final-photo">
+
+</div>
+
+</div>
+
+<script>
+
+let stage = 0;
+
+const photos = [
+    ["photo1.jpg", "photo2.jpg"],
+    ["photo3.jpg", "photo4.jpg"],
+    ["photo5.jpg", "photo6.jpg"]
+];
+
+function showQuestion() {
+
+    document.getElementById("leftPhoto").src = photos[stage][0];
+    document.getElementById("rightPhoto").src = photos[stage][1];
+
+    const question = document.getElementById("question");
+    const answers = document.getElementById("answers");
+    const message = document.getElementById("message");
+
+    message.innerHTML = "";
+
+    if(stage === 0) {
+
+        question.innerHTML = "<h2>Как зовут нашего кота?</h2>";
+
+        answers.innerHTML = `
+        <button onclick="wrongAnswer(this)">Порш</button>
+        <button onclick="wrongAnswer(this)">Корж</button>
+        <button onclick="wrongAnswer(this)">КоТОБАС</button>
+        <button onclick="correctCat()">Кот</button>
+        `;
+    }
+
+    else if(stage === 1) {
+
+        question.innerHTML = "<h2>Сколько мы живем вместе?</h2>";
+
+        answers.innerHTML = `
+        <button onclick="correctYears()">3,5 года</button>
+        <button onclick="wrongAnswer(this)">2 года</button>
+        <button onclick="wrongAnswer(this)">10 лет</button>
+        `;
+    }
+
+    else if(stage === 2) {
+
+        question.innerHTML = "<h2>Кто в семье главный?</h2>";
+
+        answers.innerHTML = `
+        <div class="runaway-zone">
+            <button id="runaway" onmouseover="runAway()">Вероника Б.</button>
+            <button id="oleg" onclick="finish()">Олег Д.</button>
+        </div>
+        `;
+    }
+
+}
+
+function wrongAnswer(btn) {
+
+    btn.style.display = "none";
+    document.getElementById("message").innerHTML = "Давай ещё подумаем 🥰";
+
+}
+
+function correctCat() {
+
+    stage = 1;
+    showQuestion();
+
+}
+
+function correctYears() {
+
+    stage = 2;
+    showQuestion();
+
+}
+
+function runAway() {
+
+    const btn = document.getElementById("runaway");
+    const zone = btn.parentElement;
+
+    const maxX = zone.clientWidth - btn.offsetWidth - 100;
+    const maxY = zone.clientHeight - btn.offsetHeight;
+
+    const x = Math.random() * maxX;
+    const y = Math.random() * maxY;
+
+    btn.style.left = x + "px";
+    btn.style.top = y + "px";
+
+}
+
+function finish() {
+
+    document.getElementById("question").innerHTML = "";
+    document.getElementById("answers").innerHTML = "";
+    document.getElementById("final").classList.remove("hidden");
+
+}
+
+showQuestion();
+
+</script>
+
+</body>
+</html>
