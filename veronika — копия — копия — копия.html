@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Для Вероники ❤️</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #fff5f7, #fffaf0);
+    text-align: center;
+    padding: 40px;
+    color: #444;
+    overflow-x: hidden;
+}
+
+/* Сердечки / Конфети */
+.confetti {
+    position: fixed;
+    z-index: 20;
+    pointer-events: none;
+}
+
+/* Страницы */
+.page {
+    background: white;
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    display: inline-block;
+    min-width: 320px;
+    position: relative;
+    z-index: 10;
+}
+.hidden { display: none; }
+h1 { color: #ff6b81; }
+button {
+    margin: 15px;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 10px;
+    background: #ffd6e0;
+    cursor: pointer;
+    font-size: 16px;
+    transition: 0.3s;
+}
+button:hover {
+    background: #ffb6c1;
+    transform: scale(1.05);
+}
+
+/* Фото по краям */
+.side-photo {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 180px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    z-index: 5;
+}
+.left { left: 20px; }
+.right { right: 20px; }
+
+/* Фото по центру */
+.center-photo {
+    width: 300px;
+    border-radius: 20px;
+    margin-top: 20px;
+}
+
+/* Колесо */
+canvas { border-radius: 50%; }
+.pointer { font-size: 40px; color: #ff4d6d; }
+
+/* Музыка */
+audio { display: none; }
+</style>
+</head>
+<body>
+
+<img id="leftPhoto" class="side-photo left hidden">
+<img id="rightPhoto" class="side-photo right hidden">
+
+<!-- 1 СТРАНИЦА -->
+<div class="page" id="page1">
+    <h1>Привет, Вероника ❤️</h1>
+    <h2>Вот моя Валентинка для тебя 💌</h2>
+    <button onclick="goToPage(2)">Начать ❤️</button>
+</div>
+
+<!-- 2 СТРАНИЦА -->
+<div class="page hidden" id="page2">
+    <h2>Как зовут нашего кота?</h2>
+    <button onclick="wrong(this)">Порш</button>
+    <button onclick="wrong(this)">Корж</button>
+    <button onclick="wrong(this)">КоТОБАС</button>
+    <button onclick="goToPage(3)">Кот</button>
+    <div id="msg2" style="color:#ff6b81;"></div>
+</div>
+
+<!-- 3 СТРАНИЦА -->
+<div class="page hidden" id="page3">
+    <h2>Сколько мы живем вместе?</h2>
+    <button onclick="goToPage(4)">3,5 года</button>
+    <button onclick="wrong(this)">2 года</button>
+    <button onclick="wrong(this)">10 лет</button>
+    <div id="msg3" style="color:#ff6b81;"></div>
+</div>
+
+<!-- 4 СТРАНИЦА -->
+<div class="page hidden" id="page4">
+    <h2>Кто главный в семье?</h2>
+    <div id="runawayZone" style="position:relative;height:150px;width:320px;margin:auto;">
+        <button id="runawayBtn" onmouseover="runAway()" onmousedown="runAway()" style="position:absolute;left:20px;top:60px;">Вероника Б.</button>
+        <button id="olegBtn" style="position:absolute;right:20px;top:60px;" onclick="goToPage(5)">Олег Д.</button>
+    </div>
+</div>
+
+<!-- 5 СТРАНИЦА -->
+<div class="page hidden" id="page5">
+    <h2>Ты молодец 🥰</h2>
+    <h3>И на всё правильно ответила ❤️</h3>
+    <img src="photo8.jpg" class="center-photo">
+    <br>
+    <button onclick="goToPage(6)">Теперь выбираем приз 🎁</button>
+</div>
+
+<!-- 6 СТРАНИЦА КОЛЕСО -->
+<div class="page hidden" id="page6">
+    <h2 id="wheelTitle">Колесо подарков Вероники Б.</h2>
+    <div style="position: relative; display: inline-block;">
+        <canvas id="wheelCanvas" width="300" height="300"></canvas>
+        <div class="pointer" style="
+            position: absolute;
+            right: -20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 40px;
+            color: #ff4d6d;
+        ">⬅</div>
+    </div>
+    <br>
+    <button onclick="spinWheel()">Крутить 🎡</button>
+    <div id="result" style="margin-top:20px;font-size:24px;font-weight:bold;color:#ff4d6d;"></div>
+    <div id="afterSpinMsg" style="margin-top:15px;color:#ff6b81;font-size:18px;"></div>
+</div>
+
+<audio id="bgMusic" src="music.mp3" loop></audio>
+<audio id="clickSound" src="click.mp3"></audio>
+<audio id="wheelSound" src="wheel.mp3"></audio>
+
+
+<script>
+/* Фото по страницам */
+const photos = {
+    1: ["photo1.jpg","photo2.jpg"],
+    2: ["photo2.jpg","photo3.jpg"],
+    3: ["photo4.jpg","photo5.jpg"],
+    4: ["photo6.jpg","photo7.jpg"]
+};
+let stage = 1;
+const leftPhoto = document.getElementById("leftPhoto");
+const rightPhoto = document.getElementById("rightPhoto");
+
+function goToPage(page) {
+    for(let i=1;i<=6;i++){ document.getElementById("page"+i).classList.add("hidden"); }
+    document.getElementById("page"+page).classList.remove("hidden");
+
+    if(photos[page]){
+        leftPhoto.src = photos[page][0];
+        rightPhoto.src = photos[page][1];
+        leftPhoto.classList.remove("hidden");
+        rightPhoto.classList.remove("hidden");
+
+        // Увеличиваем фото7
+        if(photos[page][1] === "photo7.jpg"){
+            rightPhoto.style.transform = "scale(1.3)";
+        } else {
+            rightPhoto.style.transform = "scale(1)";
+        }
+        leftPhoto.style.transform = "scale(1)";
+    } else {
+        leftPhoto.classList.add("hidden");
+        rightPhoto.classList.add("hidden");
+    }
+
+    if(page === 6){ drawWheel(); }
+
+    stage = page;
+}
+
+/* Неправильный ответ */
+function wrong(btn){
+    btn.style.display = "none";
+    const messages = [
+        "Давай ещё подумаем 🥰",
+        "Ты молодец, но выбери другой вариант 😘",
+        "Чуть-чуть ошиблась 💖",
+        "Кликнула не туда 😏"
+    ];
+    const msg = messages[Math.floor(Math.random() * messages.length)];
+    if(stage === 2){ document.getElementById("msg2").innerHTML = msg; }
+    else if(stage === 3){ document.getElementById("msg3").innerHTML = msg; }
+}
+
+/* Злая кнопка */
+function runAway() {
+    const btn = document.getElementById("runawayBtn");
+    const zone = document.getElementById("runawayZone");
+    const oleg = document.getElementById("olegBtn");
+
+    const zoneRect = zone.getBoundingClientRect();
+    const olegRect = oleg.getBoundingClientRect();
+
+    const maxX = zone.clientWidth - btn.offsetWidth;
+    const maxY = zone.clientHeight - btn.offsetHeight;
+
+    let randomX, randomY, tries=0;
+    do {
+        randomX = Math.random()*maxX;
+        randomY = Math.random()*maxY;
+        var btnLeft = zoneRect.left + randomX;
+        var btnRight = btnLeft + btn.offsetWidth;
+        var btnTop = zoneRect.top + randomY;
+        var btnBottom = btnTop + btn.offsetHeight;
+        var overlap = btnRight > olegRect.left && btnLeft < olegRect.right && btnBottom > olegRect.top && btnTop < olegRect.bottom;
+        tries++;
+    } while(overlap && tries < 50);
+
+    btn.style.left = randomX + "px";
+    btn.style.top = randomY + "px";
+    btn.style.transform = "rotate(" + (Math.random()*10-5)+"deg)";
+}
+
+/* Сердечки */
+function createHeart(){
+    const heart = document.createElement("div");
+    heart.classList.add("confetti");
+    heart.innerHTML = "❤️";
+    heart.style.left = Math.random()*100+"vw";
+    heart.style.top = "-20px";
+    heart.style.fontSize = (15 + Math.random()*15) + "px";
+    document.body.appendChild(heart);
+    heart.animate([
+        { transform: 'translateY(0px) scale(1)', opacity: 1 },
+        { transform: 'translateY(800px) scale(1.5)', opacity: 0 }
+    ], { duration: 8000, easing: 'linear' });
+    setTimeout(()=>heart.remove(), 8000);
+}
+
+/* Интервал сердечек 1-5 страницы */
+let heartInterval = setInterval(() => {
+    if(stage >=1 && stage <=5){
+        createHeart();
+    }
+}, 300);
+
+/* Конфети для страницы 6 */
+function createConfetti(){
+    const confetti = document.createElement("div");
+    confetti.classList.add("confetti");
+    confetti.innerHTML = "🎊";
+    confetti.style.left = Math.random()*100 + "vw";
+    confetti.style.top = "-20px";
+    confetti.style.fontSize = (15 + Math.random()*20) + "px";
+    document.body.appendChild(confetti);
+    confetti.animate([
+        { transform: 'translateY(0px) rotate(0deg)', opacity: 1 },
+        { transform: 'translateY(600px) rotate(360deg)', opacity: 0 }
+    ], { duration: 3000, easing: 'linear' });
+    setTimeout(()=>confetti.remove(), 3000);
+}
+
+/* Музыка */
+document.body.addEventListener("click",()=>bgMusic.play(),{once:true})
+const bgMusic = document.getElementById("bgMusic");
+bgMusic.volume = 0.25; // уменьшение громкости до 25%
+;
+document.addEventListener("click",e=>{ if(e.target.tagName==="BUTTON") clickSound.play(); });
+
+/* Колесо */
+const prizes=["ТОРТИК","Поездка в Турцию","Новый iPhone","2 чмока кота","100 рублей","Прыжок с парашютом"];
+function drawWheel(){
+    const canvas=document.getElementById("wheelCanvas");
+    const ctx=canvas.getContext("2d");
+    const radius=canvas.width/2;
+    const arc=2*Math.PI/prizes.length;
+    
+    const scale = window.devicePixelRatio || 1;
+    canvas.width = 300 * scale;
+    canvas.height = 300 * scale;
+    ctx.setTransform(1,0,0,1,0,0);
+    ctx.scale(scale, scale);
+
+    ctx.clearRect(0,0,300,300);
+
+    prizes.forEach((prize,i)=>{
+        const start=i*arc;
+        ctx.beginPath();
+        ctx.moveTo(radius,radius);
+        ctx.arc(radius,radius,radius,start,start+arc);
+        ctx.fillStyle=i%2===0?"#ffd6e0":"#ffb6c1";
+        ctx.fill();
+
+        ctx.save();
+        ctx.translate(radius,radius);
+        ctx.rotate(start+arc/2);
+        ctx.fillStyle="#333";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.font = "bold 16px Arial";
+        ctx.fillText(prize, radius*0.65, 0);
+        ctx.restore();
+    });
+}
+
+function spinWheel(){
+    const wheel = document.getElementById("wheelCanvas");
+    const segments = prizes.length;
+    const targetIndex = 0; // Тортик
+    const spins = 5;
+    const arc = 360 / segments;
+
+    const wheelAudio = document.getElementById("wheelSound");
+    wheelAudio.currentTime = 0;  // старт с начала
+    wheelAudio.play();            // воспроизведение
+
+    wheel.style.transition = "none";
+    wheel.style.transform = `rotate(0deg)`;
+
+    setTimeout(() => {
+        const finalAngle = spins * 360 + (segments - targetIndex - 0.5) * arc;
+        wheel.style.transition = "transform 4s cubic-bezier(0.33,1,0.68,1)";
+        wheel.style.transform = `rotate(${finalAngle}deg)`;
+    }, 50);
+
+    // Останавливаем звук через 4 секунды
+    setTimeout(() => {
+        wheelAudio.pause();
+        wheelAudio.currentTime = 0;
+    }, 4050);
+
+    setTimeout(() => {
+        document.getElementById("result").innerHTML = "Твой приз: ТОРТИК 🎂❤️";
+
+        const confettiInterval = setInterval(createConfetti, 150);
+        setTimeout(() => clearInterval(confettiInterval), 5000);
+
+        document.getElementById("afterSpinMsg").innerHTML = "А остальные подарки оставим на другие праздники";
+    }, 4050);
+}
+
+
+/* Стартовые фото */
+goToPage(1);
+</script>
+</body>
+</html>
